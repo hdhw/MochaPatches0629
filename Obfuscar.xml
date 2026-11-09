@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<Obfuscator>
+  <Var name="InPath" value="./bin/Release/net6.0" />
+  <Var name="OutPath" value="./bin/Obfuscated" />
+  <Var name="Platform" value="dotnet" />
+
+  <!-- keep in step with the csproj's MochaCoreDir / InteropDir -->
+  <AssemblySearchPath path="./../../Documents/CoffeeNet/core" />
+  <AssemblySearchPath path="./../../Documents/CoffeeNet/interop" />
+
+  <!-- rename everything, plugin + patches are found by attribute metadata anyway -->
+  <Var name="KeepPublicApi" value="false" />
+  <Var name="HidePrivateApi" value="true" />
+  <Var name="RenameFields" value="true" />
+  <Var name="RenameProperties" value="true" />
+  <Var name="RenameEvents" value="true" />
+  <Var name="ReuseNames" value="true" />
+
+  <!-- DO NOT enable, loader throws BadImageFormatException on the result -->
+  <Var name="UseUnicodeNames" value="false" />
+  <Var name="UseKoreanNames" value="false" />
+
+  <!-- encrypts string literals, decryptor gets injected -->
+  <Var name="HideStrings" value="true" />
+
+  <Module file="./bin/Release/net6.0/MochaPatches0629.dll">
+    <!-- harmony + the loader look these up by name through reflection -->
+    <SkipMethod type="*" name="Prefix" />
+    <SkipMethod type="*" name="Postfix" />
+    <SkipMethod type="*" name="Transpiler" />
+    <SkipMethod type="*" name="Finalizer" />
+    <SkipMethod type="*" name="Prepare" />
+    <SkipMethod type="*" name="TargetMethod" />
+    <SkipMethod type="*" name="TargetMethods" />
+
+    <SkipMethod type="*" name="Load" />
+    <SkipMethod type="*" name="Unload" />
+
+    <!-- decoy, keep it readable on purpose -->
+    <SkipNamespace name="ObfuscatedByTopLevelOpsecObf" />
+  </Module>
+</Obfuscator>

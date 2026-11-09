@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>MochaPatches0629</AssemblyName>
+    <RootNamespace>Mocha.Patch</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <!-- assembly metadata is declared via [assembly: ...] / BepInPlugin in Core.cs -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+    <PlatformTarget>x64</PlatformTarget>
+
+    <!-- BepInEx core: the loader install actually deployed onto the 20230629 game
+         folder. Interop: generated from scratch for build 20230629 itself, via a
+         standalone Il2CppInterop.Generator run over Cpp2IL's dummy DLLs for this
+         build (NOT CoffeeNet's interop set, which is for build 20230414). -->
+    <MochaDir>..</MochaDir>
+    <MochaCoreDir>/home/isabelle/Documents/RRBuilds/2023/20230629/BepInEx/core</MochaCoreDir>
+    <InteropDir>/home/isabelle/Documents/RRBuilds/decompiled/20230629/interop_generated</InteropDir>
+
+    <!-- only use the hint paths, dont let RAR guess -->
+    <AssemblySearchPaths>{HintPathFromItem};{RawFileName}</AssemblySearchPaths>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx.Core">
+      <HintPath>$(MochaCoreDir)\BepInEx.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP">
+      <HintPath>$(MochaCoreDir)\BepInEx.Unity.IL2CPP.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx.Unity.Common">
+      <HintPath>$(MochaCoreDir)\BepInEx.Unity.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(MochaCoreDir)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>$(MochaCoreDir)\Il2CppInterop.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Common">
+      <HintPath>$(MochaCoreDir)\Il2CppInterop.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="SemanticVersioning">
+      <HintPath>$(MochaCoreDir)\SemanticVersioning.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(InteropDir)\*.dll" Private="false" />
+  </ItemGroup>
+
+  <Target Name="CopyToPlugins" AfterTargets="Build">
+    <MakeDir Directories="$(MochaDir)\plugins" Condition="!Exists('$(MochaDir)\plugins')" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MochaDir)\plugins\" SkipUnchangedFiles="false" />
+  </Target>
+
+  <Target Name="Obfuscate" DependsOnTargets="Build">
+    <Error Condition="'$(Configuration)' != 'Release'"
+           Text="Obfuscate must run in Release: dotnet build -c Release -t:Obfuscate" />
+    <Exec Command="obfuscar.console Obfuscar.xml" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <MakeDir Directories="$(MSBuildProjectDirectory)\dist" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\bin\Obfuscated\MochaPatches0629.dll" DestinationFolder="$(MSBuildProjectDirectory)\dist\" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\dist\MochaPatches0629.dll" DestinationFolder="$(MochaDir)\plugins\" />
+  </Target>
+
+</Project>
